@@ -51,8 +51,7 @@ object PopUp {
         horizontalAlignment = sharedPref.getInt("horizontalAlignment", horizontalAlignment)
         backgroundBehavior = sharedPref.getInt("backgroundBehavior", backgroundBehavior)
         screenOrientation = sharedPref.getInt("screenOrientation", screenOrientation)
-        closeWhenTapBackButton =
-            sharedPref.getBoolean("closeWhenTapBackButton", closeWhenTapBackButton)
+        closeWhenTapBackButton = sharedPref.getBoolean("closeWhenTapBackButton", closeWhenTapBackButton)
         isDraggable = sharedPref.getBoolean("isDraggable", isDraggable)
         lastX = sharedPref.getInt("lastX", lastX)
         lastY = sharedPref.getInt("lastY", lastY)

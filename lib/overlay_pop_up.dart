@@ -37,14 +37,17 @@ class OverlayPopUp {
   /// [screenOrientation] by default is portrait its param define the overlay orientation.
   ///
   static Future<bool> showOverlay({
-    int? height,
-    int? width,
+    int? height = -1,
+    int? width = -1,
+    int? lastX,
+    int? lastY,
     Gravity? verticalAlignment,
     Gravity? horizontalAlignment,
     OverlayFlag? backgroundBehavior,
     ScreenOrientation? screenOrientation,
     bool? closeWhenTapBackButton = false,
     bool? isDraggable = false,
+    String? entryPointName = 'overlayPopUp',
   }) async {
     final result = await _methodChannel.invokeMethod<bool?>('showOverlay', {
       /// is not required by default is MATCH_PARENT
@@ -52,6 +55,12 @@ class OverlayPopUp {
 
       /// is not required by default is MATCH_PARENT
       'width': width,
+
+      /// is not required by default is 0
+      'lastX': lastX,
+
+      /// is not required by default is 0
+      'lastY': lastY,
 
       /// is not required by default is CENTER for more info see: https://developer.android.com/reference/android/view/Gravity
       'verticalAlignment': verticalAlignment?.value,
@@ -70,6 +79,9 @@ class OverlayPopUp {
 
       /// by default is false therefore the overlay can´t be dragged.
       'isDraggable': isDraggable,
+
+      /// by default is overlayPopUp
+      'entryPointName': entryPointName,
     });
     return result ?? false;
   }

@@ -22,8 +22,7 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 
 
-class OverlayPopUpPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
-    BasicMessageChannel.MessageHandler<Any?> {
+class OverlayPopUpPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, BasicMessageChannel.MessageHandler<Any?> {
     private var channel: MethodChannel? = null
     private var context: Context? = null
     private var activity: Activity? = null
@@ -42,9 +41,7 @@ class OverlayPopUpPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         channel?.setMethodCallHandler(this)
         this.context = flutterPluginBinding.applicationContext
         messageChannel = BasicMessageChannel<Any?>(
-            flutterPluginBinding.binaryMessenger,
-            OVERLAY_MESSAGE_CHANNEL_NAME,
-            JSONMessageCodec.INSTANCE
+            flutterPluginBinding.binaryMessenger, OVERLAY_MESSAGE_CHANNEL_NAME, JSONMessageCodec.INSTANCE
         )
         messageChannel?.setMessageHandler(this)
     }
@@ -89,28 +86,32 @@ class OverlayPopUpPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     private fun showOverlay(call: MethodCall, result: Result) {
         val i = Intent(context, OverlayService::class.java)
         i.flags = Intent.FLAG_ACTIVITY_NEW_TASK and Intent.FLAG_ACTIVITY_SINGLE_TOP
+
         PopUp.width = call.argument<Int>("width") ?: PopUp.width
         PopUp.height = call.argument<Int>("height") ?: PopUp.height
+
         PopUp.verticalAlignment = call.argument<Int>("verticalAlignment") ?: PopUp.verticalAlignment
-        PopUp.horizontalAlignment =
-            call.argument<Int>("horizontalAlignment") ?: PopUp.horizontalAlignment
-        PopUp.backgroundBehavior =
-            call.argument<Int>("backgroundBehavior") ?: PopUp.backgroundBehavior
+        PopUp.horizontalAlignment = call.argument<Int>("horizontalAlignment") ?: PopUp.horizontalAlignment
+
+        PopUp.backgroundBehavior = call.argument<Int>("backgroundBehavior") ?: PopUp.backgroundBehavior
         PopUp.screenOrientation = call.argument<Int>("screenOrientation") ?: PopUp.screenOrientation
-        PopUp.closeWhenTapBackButton =
-            call.argument<Boolean>("closeWhenTapBackButton") ?: PopUp.closeWhenTapBackButton
-        PopUp.isDraggable =
-            call.argument<Boolean>("isDraggable") ?: PopUp.isDraggable
-        PopUp.entryPointName =
-            call.argument<String>("entryPointName") ?: OVERLAY_POP_UP_ENTRY_BY_DEFAULT
+        PopUp.isDraggable = call.argument<Boolean>("isDraggable") ?: PopUp.isDraggable
+
+        PopUp.closeWhenTapBackButton = call.argument<Boolean>("closeWhenTapBackButton") ?: PopUp.closeWhenTapBackButton
+
+        PopUp.entryPointName = call.argument<String>("entryPointName") ?: OVERLAY_POP_UP_ENTRY_BY_DEFAULT
+
+        PopUp.lastX = call.argument<Int>("lastX") ?: PopUp.lastX
+        PopUp.lastY = call.argument<Int>("lastY") ?: PopUp.lastY
+
         if (context != null) PopUp.savePreferences(context!!)
-        
+
         if (activity == null) {
             context?.applicationContext?.startService(i)
         } else {
             activity?.startService(i)
         }
-        
+
         result.success(true)
     }
 
@@ -140,9 +141,11 @@ class OverlayPopUpPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             val windowConfig = OverlayService.flutterView.layoutParams
             windowConfig.width = call.argument("width") ?: WindowManager.LayoutParams.MATCH_PARENT
             windowConfig.height = call.argument("height") ?: WindowManager.LayoutParams.MATCH_PARENT
+
             OverlayService.windowManager!!.updateViewLayout(
                 OverlayService.flutterView, windowConfig
             )
+
             result.success(true)
         } else result.notImplemented()
     }
@@ -152,8 +155,7 @@ class OverlayPopUpPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             result.success(
                 mapOf(
                     "overlayPosition" to mapOf(
-                        "x" to (OverlayService.lastX ?: 0),
-                        "y" to (OverlayService.lastY ?: 0)
+                        "x" to (OverlayService.lastX ?: 0), "y" to (OverlayService.lastY ?: 0)
                     )
                 )
             )
@@ -171,9 +173,9 @@ class OverlayPopUpPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             val windowConfig = OverlayService.flutterView.layoutParams
             windowConfig.width = PopUp.width
             windowConfig.height = PopUp.height
+
             OverlayService.windowManager!!.updateViewLayout(
-                OverlayService.flutterView,
-                windowConfig
+                OverlayService.flutterView, windowConfig
             )
         }
     }
