@@ -44,9 +44,12 @@ class OverlayService : Service(), BasicMessageChannel.MessageHandler<Any?>, View
         super.onCreate()
         PopUp.loadPreferences(applicationContext)
         if (PopUp.entryPointName.isBlank()) return
+
         validateDartEntryPoint()
+
         val engine = FlutterEngineCache.getInstance().get(OverlayPopUpPlugin.CACHE_ENGINE_ID)!!
         engine.lifecycleChannel.appIsResumed()
+
         flutterView =
             object : FlutterView(applicationContext, FlutterTextureView(applicationContext)) {
                 override fun dispatchKeyEvent(event: KeyEvent): Boolean {
@@ -58,27 +61,40 @@ class OverlayService : Service(), BasicMessageChannel.MessageHandler<Any?>, View
                     } else super.dispatchKeyEvent(event)
                 }
             }
-        flutterView.attachToFlutterEngine(
-            FlutterEngineCache.getInstance().get(OverlayPopUpPlugin.CACHE_ENGINE_ID)!!
-        )
+        flutterView.attachToFlutterEngine(FlutterEngineCache.getInstance().get(OverlayPopUpPlugin.CACHE_ENGINE_ID)!!)
         flutterView.fitsSystemWindows = true
         flutterView.setBackgroundColor(Color.TRANSPARENT)
+        flutterView.bringToFront()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            flutterView.elevation = 1000f
+        };
         flutterView.setOnTouchListener(this)
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager?
+
         val windowConfig = WindowManager.LayoutParams(
             PopUp.width,
             PopUp.height,
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY else WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
-            if (PopUp.backgroundBehavior == 1) WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN else
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+            else
+                WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
+
+            if (PopUp.backgroundBehavior == 1)
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+            else
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
             PixelFormat.TRANSPARENT
         )
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O_MR1) {
-            windowConfig.flags =
-                windowConfig.flags or WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
-                        WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                        WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+            windowConfig.flags = windowConfig.flags or
+            WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
+            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+            WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
         }
 
         windowConfig.gravity = PopUp.verticalAlignment or PopUp.horizontalAlignment
@@ -102,6 +118,7 @@ class OverlayService : Service(), BasicMessageChannel.MessageHandler<Any?>, View
             val dartEntry = DartExecutor.DartEntrypoint(
                 FlutterInjector.instance().flutterLoader().findAppBundlePath(),
                 PopUp.entryPointName
+
             )
             val engine = engineGroup.createAndRunEngine(applicationContext, dartEntry)
             FlutterEngineCache.getInstance().put(OverlayPopUpPlugin.CACHE_ENGINE_ID, engine)
